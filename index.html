@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employee ID Card Generator — SPR Supply Chin</title>
+
+  <!-- Thai + Latin font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&family=Noto+Sans+Thai:wght@400;700;800&display=swap" rel="stylesheet" />
+
+  <!-- html2canvas for PNG export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+          integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <style>
+    /* ── Reset ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: #d1d5db;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    /* ── App wrapper ────────────────────────────────────── */
+    .app-wrapper {
+      display: flex;
+      gap: 48px;
+      align-items: flex-start;
+      width: 100%;
+      max-width: 860px;
+    }
+
+    /* ── Form panel ─────────────────────────────────────── */
+    .form-panel {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 32px 28px;
+      width: 300px;
+      min-width: 280px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 28px rgba(0, 0, 0, 0.12);
+    }
+
+    .form-panel h2 {
+      font-size: 18px;
+      font-weight: 800;
+      color: #111;
+      margin-bottom: 8px;
+    }
+
+    .form-panel .subtitle {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 26px;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #666;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .form-group input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Sarabun', sans-serif;
+      color: #222;
+      outline: none;
+      transition: border-color 0.18s;
+      background: #fafafa;
+    }
+
+    .form-group input[type="text"]:focus {
+      border-color: #e10600;
+      background: #fff;
+    }
+
+    /* Photo upload */
+    .photo-upload-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 108px;
+      border: 2px dashed #ccc;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #999;
+      font-size: 12px;
+      font-family: 'Sarabun', sans-serif;
+      transition: border-color 0.18s, color 0.18s;
+      background: #fafafa;
+      gap: 7px;
+    }
+
+    .photo-upload-box:hover {
+      border-color: #e10600;
+      color: #e10600;
+    }
+
+    .photo-upload-box svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    #photo-input { display: none; }
+
+    #upload-thumb {
+      width: 100%;
+      max-height: 80px;
+      border-radius: 7px;
+      object-fit: cover;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* Photo crop sliders */
+    .crop-sliders {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 12px;
+      background: #f7f7f7;
+      border-radius: 8px;
+      border: 1px solid #e8e8e8;
+    }
+
+    .crop-sliders.visible { display: flex; }
+
+    .crop-sliders label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .crop-sliders input[type=range] {
+      width: 100%;
+      accent-color: #e10600;
+      cursor: pointer;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 26px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: 'Sarabun', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: opacity 0.18s, transform 0.1s;
+    }
+
+    .btn:active { transform: scale(0.975); }
+
+    .btn-primary {
+      background: #e10600;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover { opacity: 0.87; }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #444;
+    }
+
+    .btn-secondary:hover { background: #e4e4e4; }
+
+    .btn-print {
+      background: #1a73e8;
+      color: #ffffff;
+    }
+
+    .btn-print:hover { opacity: 0.87; }
+    .btn-print:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* ── Print A4 Modal ──────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 24px;
+      width: 440px;
+      max-width: 92vw;
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.25);
+      font-family: 'Sarabun', sans-serif;
+    }
+
+    .modal-box h3 {
+      font-size: 18px;
+      font-weight: 800;
+      color: #111;
+      margin-bottom: 4px;
+    }
+
+    .modal-box .modal-subtitle {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 18px;
+    }
+
+    .card-upload-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 100px;
+      border: 2px dashed #ccc;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #999;
+      font-size: 13px;
+      transition: border-color 0.18s, color 0.18s;
+      background: #fafafa;
+      gap: 6px;
+      padding: 18px;
+    }
+
+    .card-upload-zone:hover {
+      border-color: #1a73e8;
+      color: #1a73e8;
+    }
+
+    .card-thumbs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .card-thumb-item {
+      position: relative;
+      width: 70px;
+      height: 110px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid #e0e0e0;
+      background: #f5f5f5;
+    }
+
+    .card-thumb-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-thumb-item .remove-thumb {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 18px;
+      height: 18px;
+      background: #e10600;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 11px;
+      line-height: 18px;
+      text-align: center;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .card-count {
+      font-size: 12px;
+      color: #666;
+      margin-top: 10px;
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-btns .btn { flex: 1; }
+
+    /* ── Preview panel ──────────────────────────────────── */
+    .preview-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .preview-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* ── ID Card — 54 mm × 85 mm (standard ID card) ──────
+       Preview rendered at 400 × 630 px (scale ≈ 1.96×).
+       Download outputs 638 × 1004 px = 300 DPI at 54 × 85 mm. */
+    #id-card {
+      width: 400px;
+      height: 630px;
+      background: #e10600;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 10px 44px rgba(0, 0, 0, 0.30);
+      display: flex;
+      flex-direction: column;
+      font-family: 'Sarabun', sans-serif;
+      /* isolate for html2canvas */
+      position: relative;
+    }
+
+    /* Header ── white/grey bar */
+    .card-header {
+      background: #f2f2f2;
+      width: 100%;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-radius: 0 0 20px 20px;
+      flex-shrink: 0;
+      min-height: 108px;
+    }
+
+    .spr-logo-wrap {
+      width: 78px;
+      height: 78px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .spr-logo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .company-name {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .company-name .thai-name {
+      font-size: 18px;
+      font-weight: 500;
+      color: #1a1a1a;
+      line-height: 1;
+      font-family: 'Noto Sans Thai', 'Sarabun', sans-serif;
+      white-space: nowrap;
+      text-align: center;
+      width: 100%;
+    }
+
+    .company-name .eng-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: #111111;
+      line-height: 1;
+      letter-spacing: 0px;
+      font-family: 'Noto Sans Thai', 'Sarabun', sans-serif;
+      white-space: nowrap;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* Card body */
+    .card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 14px;
+    }
+
+    /* Photo frame */
+    .photo-frame {
+      width: 208px;
+      height: 272px;
+      background: #fff;
+      border: 5px solid #ffffff;
+      border-radius: 3px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    #emp-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 20%;
+      transform: scale(1);
+      transform-origin: center 20%;
+      display: none;
+    }
+
+    .photo-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e0e0e0;
+      color: #aaa;
+      font-size: 12px;
+      font-family: 'Sarabun', sans-serif;
+    }
+
+    /* Name / code */
+    .info-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin-top: 10px;
+    }
+
+    #emp-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      text-align: center;
+      line-height: 1.25;
+      letter-spacing: 0.3px;
+    }
+
+    .divider {
+      width: 72%;
+      height: 2px;
+      background: linear-gradient(to right, transparent, #c9a227 25%, #c9a227 75%, transparent);
+      border: none;
+      margin: 7px auto;
+    }
+
+    #emp-code {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    /* J&T logo */
+    .jt-logo-wrap {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+      flex-shrink: 0;
+    }
+
+    .jt-logo-wrap img {
+      max-width: 210px;
+      height: auto;
+      object-fit: contain;
+      /* PNG has transparent bg — convert all colored pixels to white */
+      filter: brightness(0) invert(1);
+    }
+
+    /* ── Responsive ─────────────────────────────────────── */
+    @media (max-width: 800px) {
+      .app-wrapper {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .form-panel {
+        width: 100%;
+        max-width: 400px;
+      }
+
+      #id-card {
+        width: 340px;
+        height: 535px;
+      }
+
+      .card-header { min-height: 92px; padding: 12px 14px; gap: 11px; }
+
+      .photo-frame {
+        width: 177px;
+        height: 231px;
+      }
+
+      #emp-name { font-size: 18px; }
+      #emp-code { font-size: 18px; }
+
+      .spr-logo-wrap { width: 66px; height: 66px; }
+      .company-name .thai-name { font-size: 11px; font-weight: 400; }
+      .company-name .eng-name { font-size: 15.5px; }
+      .jt-logo-wrap img { max-width: 175px; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="app-wrapper">
+
+  <!-- ── Form Panel ────────────────────────────────────── -->
+  <div class="form-panel">
+    <h2>ID Card Generator</h2>
+    <p class="subtitle">Fill in the details and upload a photo.<br>The card preview updates live.</p>
+
+    <div class="form-group">
+      <label for="input-name">Employee Name</label>
+      <input type="text" id="input-name" placeholder="e.g. Miss Aye Thangyan" autocomplete="off" />
+    </div>
+
+    <div class="form-group">
+      <label for="input-code">Employee Code</label>
+      <input type="text" id="input-code" placeholder="e.g. CC8499240" autocomplete="off" />
+    </div>
+
+    <div class="form-group">
+      <label>Employee Photo</label>
+      <label class="photo-upload-box" for="photo-input" id="photo-upload-label">
+        <!-- Upload icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+        </svg>
+        <span id="upload-text">Click to upload photo</span>
+      </label>
+      <input type="file" id="photo-input" accept="image/*" />
+      <img id="upload-thumb" src="" alt="Uploaded photo preview" />
+
+      <!-- Crop position controls (shown after photo upload) -->
+      <div class="crop-sliders" id="crop-sliders">
+        <label>
+          &#8597; Vertical position
+          <input type="range" id="crop-y" min="0" max="100" value="20" />
+        </label>
+        <label>
+          &#8596; Horizontal position
+          <input type="range" id="crop-x" min="0" max="100" value="50" />
+        </label>
+        <label>
+          &#128269; Zoom
+          <input type="range" id="crop-z" min="100" max="300" value="100" />
+        </label>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-secondary" id="btn-generate">Generate Card</button>
+      <button class="btn btn-primary" id="btn-download">&#8595; Download Card</button>
+      <button class="btn btn-print" id="btn-print-a4">&#128424; Print A4 (10 Cards)</button>
+    </div>
+  </div>
+
+  <!-- ── Preview Panel ─────────────────────────────────── -->
+  <div class="preview-panel">
+    <div class="preview-label">Card Preview</div>
+
+    <div id="id-card">
+
+      <!-- Header -->
+      <div class="card-header">
+        <div class="spr-logo-wrap">
+          <img src="spr-logo.png" alt="SPR Logo" />
+        </div>
+        <div class="company-name">
+          <span class="thai-name">บริษัท เอสพีอาร์ ซัพพลายเชน จำกัด</span>
+          <span class="eng-name">SPR SUPPLY CHIN CO.,LTD.</span>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="card-body">
+
+        <!-- Photo -->
+        <div class="photo-frame">
+          <div class="photo-placeholder" id="photo-placeholder">No Photo</div>
+          <img id="emp-photo" src="" alt="Employee" crossorigin="anonymous" />
+        </div>
+
+        <!-- Name & Code -->
+        <div class="info-section">
+          <div id="emp-name">Employee Name</div>
+          <hr class="divider" />
+          <div id="emp-code">Employee Code</div>
+        </div>
+
+        <!-- J&T logo -->
+        <div class="jt-logo-wrap">
+          <img src="%20Mar%2012%2C%202026%2C%2012_09_25%20AM.png" alt="J&amp;T Express" />
+        </div>
+
+      </div><!-- /.card-body -->
+    </div><!-- /#id-card -->
+  </div><!-- /.preview-panel -->
+
+</div><!-- /.app-wrapper -->
+
+<!-- ── Print A4 Modal ──────────────────────────────────── -->
+<div class="modal-overlay" id="print-modal">
+  <div class="modal-box">
+    <h3>Print A4 — Multiple Cards</h3>
+    <p class="modal-subtitle">Download ထားတဲ့ card ပုံများကို upload လုပ်ပါ (10 ပုံအထိ)။<br>A4 စာရွက်ပေါ်မှာ စီပြီး print ထုတ်ပေးပါမယ်။</p>
+
+    <label class="card-upload-zone" for="card-files-input">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+      </svg>
+      <span>Click to select card images</span>
+    </label>
+    <input type="file" id="card-files-input" accept="image/*" multiple style="display:none" />
+
+    <div class="card-thumbs" id="card-thumbs"></div>
+    <div class="card-count" id="card-count"></div>
+
+    <div class="modal-btns">
+      <button class="btn btn-secondary" id="btn-modal-close">Cancel</button>
+      <button class="btn btn-print" id="btn-modal-print" disabled>Print A4</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  'use strict';
+
+  // ── Element refs ──────────────────────────────────────────
+  const nameInput      = document.getElementById('input-name');
+  const codeInput      = document.getElementById('input-code');
+  const photoInput     = document.getElementById('photo-input');
+  const empName        = document.getElementById('emp-name');
+  const empCode        = document.getElementById('emp-code');
+  const empPhoto       = document.getElementById('emp-photo');
+  const photoPlaceholder = document.getElementById('photo-placeholder');
+  const uploadThumb    = document.getElementById('upload-thumb');
+  const uploadText     = document.getElementById('upload-text');
+  const btnGenerate    = document.getElementById('btn-generate');
+  const btnDownload    = document.getElementById('btn-download');
+  const card           = document.getElementById('id-card');
+  const cropSliders    = document.getElementById('crop-sliders');
+  const cropX          = document.getElementById('crop-x');
+  const cropY          = document.getElementById('crop-y');
+  const cropZ          = document.getElementById('crop-z');
+
+  // ── Update photo crop position + zoom ────────────────────
+  function updateCrop() {
+    const x = cropX.value + '%';
+    const y = cropY.value + '%';
+    const z = (cropZ.value / 100).toFixed(2);
+    empPhoto.style.objectPosition = x + ' ' + y;
+    empPhoto.style.transformOrigin = x + ' ' + y;
+    empPhoto.style.transform = 'scale(' + z + ')';
+  }
+
+  cropX.addEventListener('input', updateCrop);
+  cropY.addEventListener('input', updateCrop);
+  cropZ.addEventListener('input', updateCrop);
+
+  // ── Live update ───────────────────────────────────────────
+  function updatePreview() {
+    empName.textContent = nameInput.value.trim() || 'Employee Name';
+    empCode.textContent = codeInput.value.trim() || 'Employee Code';
+  }
+
+  // ── Photo upload ──────────────────────────────────────────
+  function handlePhoto(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Safety: only allow image types
+    if (!file.type.startsWith('image/')) {
+      alert('Please select a valid image file.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+      const dataUrl = ev.target.result;
+      empPhoto.src = dataUrl;
+      empPhoto.style.display = 'block';
+      photoPlaceholder.style.display = 'none';
+      // Reset crop sliders to default (face at top)
+      cropX.value = 50;
+      cropY.value = 20;
+      cropZ.value = 100;
+      updateCrop();
+      // Show crop controls
+      cropSliders.classList.add('visible');
+      // Sidebar thumbnail
+      uploadThumb.src = dataUrl;
+      uploadThumb.style.display = 'block';
+      uploadText.textContent = file.name;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ── Download ──────────────────────────────────────────────
+  function downloadCard() {
+    btnDownload.textContent = 'Generating\u2026';
+    btnDownload.disabled = true;
+
+    // Capture at high resolution (scale 3) then resize to exact
+    // 54 × 85 mm at 300 DPI → 638 × 1004 px
+    html2canvas(card, {
+      scale: 3,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: null,
+      logging: false
+    }).then(function (canvas) {
+      // Resize to exact 54×85 mm at 300 DPI
+      var targetW = Math.round(54 / 25.4 * 300);  // 638
+      var targetH = Math.round(85 / 25.4 * 300);  // 1004
+      var resized = document.createElement('canvas');
+      resized.width = targetW;
+      resized.height = targetH;
+      var ctx = resized.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(canvas, 0, 0, targetW, targetH);
+
+      var link = document.createElement('a');
+      var safeName = (nameInput.value.trim().replace(/[^a-zA-Z0-9_\-\u0E00-\u0E7F]/g, '_') || 'employee');
+      link.download = 'ID_Card_' + safeName + '.png';
+      link.href = resized.toDataURL('image/png');
+      link.click();
+    }).catch(function (err) {
+      console.error('html2canvas error:', err);
+      alert(
+        'Download failed.\n\n' +
+        'Tip: open index.html via a local web server (e.g. VS Code Live Server) ' +
+        'so that logo images can be loaded with CORS.'
+      );
+    }).finally(function () {
+      btnDownload.textContent = '\u2195 Download Card';
+      btnDownload.disabled = false;
+    });
+  }
+
+  // ── Print A4 Modal ────────────────────────────────────────
+  var btnPrintA4    = document.getElementById('btn-print-a4');
+  var printModal    = document.getElementById('print-modal');
+  var btnModalClose = document.getElementById('btn-modal-close');
+  var btnModalPrint = document.getElementById('btn-modal-print');
+  var cardFilesInput = document.getElementById('card-files-input');
+  var cardThumbs    = document.getElementById('card-thumbs');
+  var cardCountEl   = document.getElementById('card-count');
+  var uploadedCards = [];  // array of data URLs
+
+  btnPrintA4.addEventListener('click', function () {
+    printModal.classList.add('active');
+  });
+
+  btnModalClose.addEventListener('click', function () {
+    printModal.classList.remove('active');
+  });
+
+  printModal.addEventListener('click', function (e) {
+    if (e.target === printModal) printModal.classList.remove('active');
+  });
+
+  function updateCardCount() {
+    var n = uploadedCards.length;
+    cardCountEl.textContent = n > 0 ? n + ' / 10 cards selected' : '';
+    btnModalPrint.disabled = n === 0;
+  }
+
+  function renderThumbs() {
+    cardThumbs.innerHTML = '';
+    uploadedCards.forEach(function (dataUrl, i) {
+      var div = document.createElement('div');
+      div.className = 'card-thumb-item';
+      var img = document.createElement('img');
+      img.src = dataUrl;
+      img.alt = 'Card ' + (i + 1);
+      var btn = document.createElement('button');
+      btn.className = 'remove-thumb';
+      btn.textContent = '\u00D7';
+      btn.addEventListener('click', function () {
+        uploadedCards.splice(i, 1);
+        renderThumbs();
+        updateCardCount();
+      });
+      div.appendChild(img);
+      div.appendChild(btn);
+      cardThumbs.appendChild(div);
+    });
+    updateCardCount();
+  }
+
+  cardFilesInput.addEventListener('change', function (e) {
+    var files = Array.from(e.target.files);
+    var remaining = 10 - uploadedCards.length;
+    if (remaining <= 0) {
+      alert('10 cards already selected.');
+      return;
+    }
+    files = files.slice(0, remaining);
+    var loaded = 0;
+    files.forEach(function (file) {
+      if (!file.type.startsWith('image/')) return;
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        uploadedCards.push(ev.target.result);
+        loaded++;
+        if (loaded === files.length) {
+          renderThumbs();
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    // Reset input so same files can be re-selected
+    cardFilesInput.value = '';
+  });
+
+  btnModalPrint.addEventListener('click', function () {
+    if (uploadedCards.length === 0) return;
+    btnModalPrint.textContent = 'Generating\u2026';
+    btnModalPrint.disabled = true;
+
+    // Card size: 54x85mm at 300 DPI
+    var cardW = Math.round(54 / 25.4 * 300);  // 638
+    var cardH = Math.round(85 / 25.4 * 300);  // 1004
+    // Rotated: 1004 x 638
+    var rotW = cardH, rotH = cardW;
+    var cols = 2, rows = 5;
+    var a4W = Math.round(210 / 25.4 * 300);  // 2480
+    var a4H = Math.round(297 / 25.4 * 300);  // 3508
+    var gapX = Math.floor((a4W - rotW * cols) / (cols + 1));
+    var gapY = Math.floor((a4H - rotH * rows) / (rows + 1));
+
+    // Load all card images
+    var images = [];
+    var loadCount = 0;
+    uploadedCards.forEach(function (dataUrl, idx) {
+      var img = new Image();
+      img.onload = function () {
+        images[idx] = img;
+        loadCount++;
+        if (loadCount === uploadedCards.length) drawA4();
+      };
+      img.src = dataUrl;
+    });
+
+    function drawA4() {
+      var a4 = document.createElement('canvas');
+      a4.width = a4W;
+      a4.height = a4H;
+      var ctx = a4.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, a4W, a4H);
+
+      var idx = 0;
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+          if (idx >= images.length) break;
+          var x = gapX + c * (rotW + gapX);
+          var y = gapY + r * (rotH + gapY);
+          ctx.save();
+          ctx.translate(x + rotW / 2, y + rotH / 2);
+          ctx.rotate(-Math.PI / 2);
+          ctx.drawImage(images[idx], -cardW / 2, -cardH / 2, cardW, cardH);
+          ctx.restore();
+          idx++;
+        }
+      }
+
+      // ── Draw crop / cut marks ──────────────────────────
+      var markLen = 30;   // length of each crop mark line (px at 300dpi ≈ 2.5mm)
+      var markOff = 8;    // offset from card edge (gap between mark and card)
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 3;
+
+      var totalCards = images.length;
+      idx = 0;
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+          if (idx >= totalCards) break;
+          var cx = gapX + c * (rotW + gapX);
+          var cy = gapY + r * (rotH + gapY);
+
+          // Top-left corner
+          ctx.beginPath();
+          ctx.moveTo(cx - markOff, cy - markOff);
+          ctx.lineTo(cx - markOff - markLen, cy - markOff);
+          ctx.moveTo(cx - markOff, cy - markOff);
+          ctx.lineTo(cx - markOff, cy - markOff - markLen);
+          ctx.stroke();
+
+          // Top-right corner
+          ctx.beginPath();
+          ctx.moveTo(cx + rotW + markOff, cy - markOff);
+          ctx.lineTo(cx + rotW + markOff + markLen, cy - markOff);
+          ctx.moveTo(cx + rotW + markOff, cy - markOff);
+          ctx.lineTo(cx + rotW + markOff, cy - markOff - markLen);
+          ctx.stroke();
+
+          // Bottom-left corner
+          ctx.beginPath();
+          ctx.moveTo(cx - markOff, cy + rotH + markOff);
+          ctx.lineTo(cx - markOff - markLen, cy + rotH + markOff);
+          ctx.moveTo(cx - markOff, cy + rotH + markOff);
+          ctx.lineTo(cx - markOff, cy + rotH + markOff + markLen);
+          ctx.stroke();
+
+          // Bottom-right corner
+          ctx.beginPath();
+          ctx.moveTo(cx + rotW + markOff, cy + rotH + markOff);
+          ctx.lineTo(cx + rotW + markOff + markLen, cy + rotH + markOff);
+          ctx.moveTo(cx + rotW + markOff, cy + rotH + markOff);
+          ctx.lineTo(cx + rotW + markOff, cy + rotH + markOff + markLen);
+          ctx.stroke();
+
+          idx++;
+        }
+      }
+
+      // Open print window
+      var a4DataUrl = a4.toDataURL('image/png');
+      var printWin = window.open('', '_blank');
+      printWin.document.write(
+        '<!DOCTYPE html><html><head><title>Print A4<\/title>' +
+        '<style>' +
+        '@page { size: A4; margin: 0; }' +
+        'body { margin: 0; padding: 0; }' +
+        'img { width: 210mm; height: 297mm; display: block; }' +
+        '<\/style><\/head><body>' +
+        '<img src="' + a4DataUrl + '" \/>' +
+        '<\/body><\/html>'
+      );
+      printWin.document.close();
+      printWin.onload = function () { printWin.print(); };
+
+      btnModalPrint.textContent = 'Print A4';
+      btnModalPrint.disabled = false;
+      printModal.classList.remove('active');
+      // Clear uploaded cards for next use
+      uploadedCards = [];
+      renderThumbs();
+    }
+  });
+
+  // ── Event listeners ───────────────────────────────────────
+  nameInput.addEventListener('input', updatePreview);
+  codeInput.addEventListener('input', updatePreview);
+  photoInput.addEventListener('change', handlePhoto);
+  btnGenerate.addEventListener('click', updatePreview);
+  btnDownload.addEventListener('click', downloadCard);
+</script>
+</body>
+</html>
