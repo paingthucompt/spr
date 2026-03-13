@@ -486,6 +486,7 @@
       text-align: center;
       line-height: 1.25;
       letter-spacing: 0.3px;
+      white-space: nowrap;
     }
 
     .divider {
@@ -568,6 +569,11 @@
     <div class="form-group">
       <label for="input-name">Employee Name</label>
       <input type="text" id="input-name" placeholder="e.g. Miss Aye Thangyan" autocomplete="off" />
+    </div>
+
+    <div class="form-group">
+      <label for="input-no">Employee No. (ကိုယ်ပိုင်နံပါတ်)</label>
+      <input type="text" id="input-no" placeholder="e.g. 0002" maxlength="4" autocomplete="off" />
     </div>
 
     <div class="form-group">
@@ -685,6 +691,7 @@
 
   // ── Element refs ──────────────────────────────────────────
   const nameInput      = document.getElementById('input-name');
+  const noInput        = document.getElementById('input-no');
   const codeInput      = document.getElementById('input-code');
   const photoInput     = document.getElementById('photo-input');
   const empName        = document.getElementById('emp-name');
@@ -717,8 +724,22 @@
 
   // ── Live update ───────────────────────────────────────────
   function updatePreview() {
-    empName.textContent = nameInput.value.trim() || 'Employee Name';
+    var name = nameInput.value.trim() || 'Employee Name';
+    var no = noInput.value.trim();
+    empName.textContent = no ? name + ' (' + no + ')' : name;
     empCode.textContent = codeInput.value.trim() || 'Employee Code';
+    autoScaleName();
+  }
+
+  // ── Auto-scale name font to fit card width ────────────────
+  function autoScaleName() {
+    var maxW = card.offsetWidth - 40; // card width minus padding
+    empName.style.fontSize = '30px';
+    var size = 30;
+    while (empName.scrollWidth > maxW && size > 14) {
+      size--;
+      empName.style.fontSize = size + 'px';
+    }
   }
 
   // ── Photo upload ──────────────────────────────────────────
@@ -1001,6 +1022,7 @@
 
   // ── Event listeners ───────────────────────────────────────
   nameInput.addEventListener('input', updatePreview);
+  noInput.addEventListener('input', updatePreview);
   codeInput.addEventListener('input', updatePreview);
   photoInput.addEventListener('change', handlePhoto);
   btnGenerate.addEventListener('click', updatePreview);
